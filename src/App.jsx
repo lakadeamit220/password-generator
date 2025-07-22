@@ -15,9 +15,9 @@ function App() {
     if (numberAllowed) str += "0123456789";
     if (charAllowed) str += "!@#$%^&*-_+=[]{}~`";
 
-    for (let i = 1; i <= length; i++) {
-      let char = Math.floor(Math.random() * str.length + 1);
-      pass += str.charAt(char);
+    for (let i = 0; i < length; i++) {
+      let index = Math.floor(Math.random() * str.length);
+      pass += str.charAt(index);
     }
 
     setPassword(pass);
@@ -25,15 +25,46 @@ function App() {
 
   const copyPasswordToClipboard = useCallback(() => {
     passwordRef.current?.select();
-    passwordRef.current?.setSelectionRange(0, 99);
-    window.navigator.clipboard.writeText(password);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    passwordRef.current?.setSelectionRange(0, password.length);
+
+    if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(password)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch(() => {
+          alert("Failed to copy password to clipboard.");
+        });
+    } else {
+      try {
+        const successful = document.execCommand("copy");
+        if (successful) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } else {
+          alert("Failed to copy password to clipboard.");
+        }
+      } catch (err) {
+        alert("Failed to copy password to clipboard.");
+      }
+    }
   }, [password]);
 
   useEffect(() => {
     passwordGenerator();
   }, [length, numberAllowed, charAllowed, passwordGenerator]);
+
+  const getPasswordStrength = () => {
+    if (length >= 12 && numberAllowed && charAllowed) {
+      return "Strong";
+    } else if (length >= 8 && (numberAllowed || charAllowed)) {
+      return "Medium";
+    } else {
+      return "Weak";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex flex-col items-center justify-center p-4">
@@ -41,7 +72,7 @@ function App() {
         <h1 className="text-4xl font-bold text-center text-green-400 mb-6">
           Password Generator
         </h1>
-        
+
         <div className="flex flex-col space-y-6">
           <div className="relative flex">
             <input
@@ -51,10 +82,14 @@ function App() {
               placeholder="Password"
               readOnly
               ref={passwordRef}
+              aria-describedby="password-strength"
             />
             <button
               onClick={copyPasswordToClipboard}
               className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+              aria-label={
+                copied ? "Password copied" : "Copy password to clipboard"
+              }
             >
               {copied ? "Copied!" : "Copy"}
             </button>
@@ -67,14 +102,16 @@ function App() {
                 <span className="text-green-400 font-medium">{length}</span>
               </div>
               <input
+                tabIndex="0"
                 type="range"
                 min={6}
                 max={100}
                 value={length}
                 className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-green-500"
                 onChange={(e) => {
-                  setLength(e.target.value);
+                  setLength(Number(e.target.value));
                 }}
+                aria-label={`Password length: ${length}`}
               />
             </div>
 
@@ -113,13 +150,18 @@ function App() {
           <button
             onClick={passwordGenerator}
             className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors duration-200"
+            aria-label="Generate new password"
           >
             Generate New Password
           </button>
         </div>
 
-        <div className="mt-6 text-center text-gray-400 text-sm">
-          <p>Password strength: {length >= 12 ? "Strong" : length >= 8 ? "Medium" : "Weak"}</p>
+        <div
+          className="mt-6 text-center text-gray-400 text-sm"
+          id="password-strength"
+          aria-live="polite"
+        >
+          <p>Password strength: {getPasswordStrength()}</p>
         </div>
       </div>
     </div>
