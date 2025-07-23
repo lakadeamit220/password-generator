@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 
 function App() {
-  // State declarations remain the same
   const [length, setLength] = useState(12);
   const [numberAllowed, setNumberAllowed] = useState(true);
   const [charAllowed, setCharAllowed] = useState(true);
@@ -9,6 +8,7 @@ function App() {
   const [lowerAllowed, setLowerAllowed] = useState(true);
   const [password, setPassword] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const passwordRef = useRef(null);
 
   const commonPatterns = [
@@ -16,7 +16,6 @@ function App() {
     "admin", "welcome", "monkey", "dragon", "baseball", "football"
   ];
 
-  // Utility functions remain the same
   const generateSecureRandom = () => {
     const array = new Uint32Array(1);
     window.crypto.getRandomValues(array);
@@ -132,7 +131,7 @@ function App() {
         <div className="space-y-6">
           <div className="relative group">
             <input
-              type="text"
+              type={showPassword ? "text" : "password"}
               value={password}
               className="w-full py-4 px-5 bg-gray-700/50 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400/50 text-lg font-mono border border-gray-600/50 transition-all duration-200 group-hover:border-emerald-400/30"
               placeholder="Generating secure password..."
@@ -140,30 +139,49 @@ function App() {
               ref={passwordRef}
               aria-describedby="password-strength"
             />
-            <button
-              onClick={copyPasswordToClipboard}
-              className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${
-                copied ? "bg-emerald-600" : "bg-emerald-500/90 hover:bg-emerald-600"
-              } text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-1 shadow-md`}
-              aria-label={copied ? "Password copied" : "Copy password to clipboard"}
-            >
-              {copied ? (
-                <>
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
+              <button
+                onClick={() => setShowPassword(!showPassword)}
+                className="p-2 text-gray-400 hover:text-emerald-400 transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
                   </svg>
-                  Copied!
-                </>
-              ) : (
-                <>
+                ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
+                    <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
                   </svg>
-                  Copy
-                </>
-              )}
-            </button>
+                )}
+              </button>
+              <button
+                onClick={copyPasswordToClipboard}
+                className={`${
+                  copied ? "bg-emerald-600" : "bg-emerald-500/90 hover:bg-emerald-600"
+                } text-white px-3 py-2 rounded-lg transition-all duration-200 flex items-center gap-1 shadow-md`}
+                aria-label={copied ? "Password copied" : "Copy password to clipboard"}
+              >
+                {copied ? (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                    Copy
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-6">
@@ -183,12 +201,6 @@ function App() {
                 onChange={(e) => setLength(Number(e.target.value))}
                 aria-label={`Password length: ${length}`}
               />
-              <div className="flex justify-between text-xs text-gray-400">
-                <span>8</span>
-                <span>12</span>
-                <span>16</span>
-                <span>20+</span>
-              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
